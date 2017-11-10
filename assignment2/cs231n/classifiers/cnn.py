@@ -37,6 +37,16 @@ class ThreeLayerConvNet(object):
     self.reg = reg
     self.dtype = dtype
     
+    # My Changes
+    self.F, self.WW = num_filters, filter_size
+    self.C, self.H, self.W = input_dim
+    
+    # pass conv_param to the forward pass for the convolutional layer
+    self.conv_param = {'stride': 1, 'pad': (self.WW - 1) / 2}
+    
+    # pass pool_param to the forward pass for the max-pooling layer
+    self.pool_param = {'pool_height': 2, 'pool_width': 2, 'stride': 2}
+    
     ############################################################################
     # TODO: Initialize weights and biases for the three-layer convolutional    #
     # network. Weights should be initialized from a Gaussian with standard     #
@@ -47,7 +57,14 @@ class ThreeLayerConvNet(object):
     # hidden affine layer, and keys 'W3' and 'b3' for the weights and biases   #
     # of the output affine layer.                                              #
     ############################################################################
-    pass
+    self.params['W1'] = weight_scale * np.random.randn(self.F, self.C, self.WW, self.WW)
+    self.params['b1'] = weight_scale * np.zeros(self.F)
+    # Input = (F, H/2, W/2), will be flatened in affine layer, Output = (hidden_dim,)
+    self.params['W2'] = weight_scale * np.random.randn(self.F * self.H/2 * self.W/2, hidden_dim)
+    self.params['b2'] = weight_scale * np.zeros(hidden_dim)
+    
+    self.params['W3'] = weight_scale * np.random.randn(hidden_dim, num_classes)
+    self.params['b3'] = weight_scale * np.zeros(num_classes)
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -65,13 +82,6 @@ class ThreeLayerConvNet(object):
     W1, b1 = self.params['W1'], self.params['b1']
     W2, b2 = self.params['W2'], self.params['b2']
     W3, b3 = self.params['W3'], self.params['b3']
-    
-    # pass conv_param to the forward pass for the convolutional layer
-    filter_size = W1.shape[2]
-    conv_param = {'stride': 1, 'pad': (filter_size - 1) / 2}
-
-    # pass pool_param to the forward pass for the max-pooling layer
-    pool_param = {'pool_height': 2, 'pool_width': 2, 'stride': 2}
 
     scores = None
     ############################################################################
@@ -79,7 +89,9 @@ class ThreeLayerConvNet(object):
     # computing the class scores for X and storing them in the scores          #
     # variable.                                                                #
     ############################################################################
-    pass
+    X, cache1 = conv_relu_pool_forward(X, W1, b1, self.conv_param, self.pool_param)
+    X, cache2 = affine_relu_forward(X, W2, b2)
+    scores, cache3 = affine_forward(X, W3, b3)
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -94,7 +106,15 @@ class ThreeLayerConvNet(object):
     # data loss using softmax, and make sure that grads[k] holds the gradients #
     # for self.params[k]. Don't forget to add L2 regularization!               #
     ############################################################################
-    pass
+    loss, dx = softmax_loss(scores, y)
+    dx, grads['W3'], grads['b3'] = affine_backward(dx, cache3)
+    dx, grads['W2'], grads['b2'] = affine_relu_backward(dx, cache2)
+    _,  grads['W1'], grads['b1'] = conv_relu_pool_backward(dx, cache1)
+    
+    
+    for w in ['W1', 'W2', 'W3']:
+      loss += 0.5 * self.reg * np.sum(self.params[w]**2)
+      grads[w] += self.reg * self.params[w]
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################

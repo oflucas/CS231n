@@ -31,7 +31,7 @@ class Solver(object):
     'X_train': # training data
     'y_train': # training labels
     'X_val': # validation data
-    'X_train': # validation labels
+    'X_val': # validation labels
   }
   model = MyAwesomeModel(hidden_size=100, reg=10)
   solver = Solver(model, data,
@@ -109,6 +109,8 @@ class Solver(object):
     # Unpack keyword arguments
     self.update_rule = kwargs.pop('update_rule', 'sgd')
     self.optim_config = kwargs.pop('optim_config', {})
+    # note there is also a self.optim_configs which deep copies 
+    # optim_config to under param.s ('W1'/'W2'/'b1'...). Checkout self._reset()
     self.lr_decay = kwargs.pop('lr_decay', 1.0)
     self.batch_size = kwargs.pop('batch_size', 100)
     self.num_epochs = kwargs.pop('num_epochs', 10)
@@ -169,6 +171,7 @@ class Solver(object):
     for p, w in self.model.params.iteritems():
       dw = grads[p]
       config = self.optim_configs[p]
+      #print p, 'dw =', dw.shape, ' w =', w.shape, 'config =', config
       next_w, next_config = self.update_rule(w, dw, config)
       self.model.params[p] = next_w
       self.optim_configs[p] = next_config

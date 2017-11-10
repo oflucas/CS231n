@@ -56,8 +56,8 @@ def sgd_momentum(w, dw, config=None):
     average of the gradients.
   """
   if config is None: config = {}
-  config.setdefault('learning_rate', 1e-2)
-  config.setdefault('momentum', 0.9)
+  alpha = config.get('learning_rate', 1e-2)
+  momentum = config.get('momentum', 0.9)
   v = config.get('velocity', np.zeros_like(w))
   
   next_w = None
@@ -65,7 +65,8 @@ def sgd_momentum(w, dw, config=None):
   # TODO: Implement the momentum update formula. Store the updated value in   #
   # the next_w variable. You should also use and update the velocity v.       #
   #############################################################################
-  pass
+  v = momentum * v - alpha * dw
+  next_w = w + v
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -79,6 +80,11 @@ def rmsprop(x, dx, config=None):
   """
   Uses the RMSProp update rule, which uses a moving average of squared gradient
   values to set adaptive per-parameter learning rates.
+  
+  RMSProp is simple as: 
+  Tijmen Tieleman and Geoffrey Hinton. "Lecture 6.5-rmsprop: 
+  Divide the gradient by a running average of its recent magnitude." 
+  COURSERA: Neural Networks for Machine Learning 4 (2012).
 
   config format:
   - learning_rate: Scalar learning rate.
@@ -88,10 +94,10 @@ def rmsprop(x, dx, config=None):
   - cache: Moving average of second moments of gradients.
   """
   if config is None: config = {}
-  config.setdefault('learning_rate', 1e-2)
-  config.setdefault('decay_rate', 0.99)
-  config.setdefault('epsilon', 1e-8)
-  config.setdefault('cache', np.zeros_like(x))
+  learning_rate = config.get('learning_rate', 1e-2)
+  decay_rate = config.get('decay_rate', 0.99)
+  eps = config.get('epsilon', 1e-8)
+  cache = config.get('cache', np.zeros_like(x))
 
   next_x = None
   #############################################################################
@@ -99,7 +105,10 @@ def rmsprop(x, dx, config=None):
   # in the next_x variable. Don't forget to update cache value stored in      #  
   # config['cache'].                                                          #
   #############################################################################
-  pass
+  cache = decay_rate * cache + (1 - decay_rate) * dx**2
+  next_x = x - learning_rate * dx / (np.sqrt(cache) + eps)
+  
+  config['cache'] = cache
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -115,20 +124,22 @@ def adam(x, dx, config=None):
   config format:
   - learning_rate: Scalar learning rate.
   - beta1: Decay rate for moving average of first moment of gradient.
+      * velocity's decay rate
   - beta2: Decay rate for moving average of second moment of gradient.
+      * factor of moving average of magnitudes
   - epsilon: Small scalar used for smoothing to avoid dividing by zero.
   - m: Moving average of gradient.
   - v: Moving average of squared gradient.
   - t: Iteration number.
   """
   if config is None: config = {}
-  config.setdefault('learning_rate', 1e-3)
-  config.setdefault('beta1', 0.9)
-  config.setdefault('beta2', 0.999)
-  config.setdefault('epsilon', 1e-8)
-  config.setdefault('m', np.zeros_like(x))
-  config.setdefault('v', np.zeros_like(x))
-  config.setdefault('t', 0)
+  learning_rate = config.get('learning_rate', 1e-3)
+  beta1 = config.get('beta1', 0.9)
+  decay_rate = config.get('beta2', 0.999)
+  eps = config.get('epsilon', 1e-8)
+  velocity = config.get('m', np.zeros_like(x))
+  mag = config.get('v', np.zeros_like(x)) # moving average of magnitudes
+  t = config.get('t', 0)
   
   next_x = None
   #############################################################################
@@ -136,7 +147,18 @@ def adam(x, dx, config=None):
   # the next_x variable. Don't forget to update the m, v, and t variables     #
   # stored in config.                                                         #
   #############################################################################
-  pass
+  t += 1
+  velocity = beta1 * velocity + (1 - beta1) * dx
+  mag = decay_rate * mag + (1 - decay_rate) * dx**2
+  
+  velocity_ = velocity / (1 - beta1 ** t) # bias-corrected
+  mag_ = mag / (1 - decay_rate ** t) # bias-corrected
+    
+  next_x = x - learning_rate * velocity_ / (np.sqrt(mag_) + eps)
+
+  config['t'] = t
+  config['v'] = mag
+  config['m'] = velocity
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
