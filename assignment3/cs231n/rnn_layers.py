@@ -32,7 +32,8 @@ def rnn_step_forward(x, prev_h, Wx, Wh, b):
   # hidden state and any values you need for the backward pass in the next_h   #
   # and cache variables respectively.                                          #
   ##############################################################################
-  pass
+  next_h = np.tanh(prev_h.dot(Wh) + x.dot(Wx) + b)
+  cache = (next_h, prev_h, x, Wx, Wh)
   ##############################################################################
   #                               END OF YOUR CODE                             #
   ##############################################################################
@@ -50,7 +51,7 @@ def rnn_step_backward(dnext_h, cache):
   Returns a tuple of:
   - dx: Gradients of input data, of shape (N, D)
   - dprev_h: Gradients of previous hidden state, of shape (N, H)
-  - dWx: Gradients of input-to-hidden weights, of shape (N, H)
+  - dWx: Gradients of input-to-hidden weights, of shape (D, H)
   - dWh: Gradients of hidden-to-hidden weights, of shape (H, H)
   - db: Gradients of bias vector, of shape (H,)
   """
@@ -61,7 +62,14 @@ def rnn_step_backward(dnext_h, cache):
   # HINT: For the tanh function, you can compute the local derivative in terms #
   # of the output value from tanh.                                             #
   ##############################################################################
-  pass
+  tanh_, prev_h, x, Wx, Wh = cache
+  dsum = dnext_h * (1. - tanh_**2) # (N, H)
+  
+  dx = dsum.dot(Wx.T)
+  dWx = x.T.dot(dsum)
+  dprev_h = dsum.dot(Wh.T)
+  dWh = prev_h.T.dot(dsum)
+  db = np.sum(dsum, axis=0)
   ##############################################################################
   #                               END OF YOUR CODE                             #
   ##############################################################################
@@ -92,7 +100,19 @@ def rnn_forward(x, h0, Wx, Wh, b):
   # input data. You should use the rnn_step_forward function that you defined  #
   # above.                                                                     #
   ##############################################################################
-  pass
+  N, T, D = x.shape
+  _, H = h0.shape
+
+  h = np.zeros((N, T, H))
+  caches = []
+  
+  ht = h0
+  for t in xrange(T):
+    ht, cache_ = rnn_step_forward(x[:, t, :], ht, Wx, Wh, b)
+    h[:, t, :] = ht
+    caches.append(cache_)
+  
+  cache = ((N, T, D, H), caches)
   ##############################################################################
   #                               END OF YOUR CODE                             #
   ##############################################################################
@@ -119,7 +139,20 @@ def rnn_backward(dh, cache):
   # sequence of data. You should use the rnn_step_backward function that you   #
   # defined above.                                                             #
   ##############################################################################
-  pass
+  shapes, caches = cache
+  N, T, D, H = shapes
+
+  dWx, dWh, db = np.zeros((D, H)), np.zeros((H, H)), np.zeros(H)
+  dx = np.zeros((N, T, D))
+
+  dht = np.zeros((N, H))
+  for t in reversed(range(T)):
+    # need to sum up gradient required from y and succesive cells
+    dx[:, t, :], dht, dWx_, dWh_, db_ = rnn_step_backward(dht + dh[:,t,:], caches[t])
+    dWx += dWx_
+    dWh += dWh_
+    db += db_
+  dh0 = dht
   ##############################################################################
   #                               END OF YOUR CODE                             #
   ##############################################################################
@@ -147,7 +180,8 @@ def word_embedding_forward(x, W):
   #                                                                            #
   # HINT: This should be very simple.                                          #
   ##############################################################################
-  pass
+  out = W[x]
+  cache = (x, W)
   ##############################################################################
   #                               END OF YOUR CODE                             #
   ##############################################################################
@@ -175,7 +209,9 @@ def word_embedding_backward(dout, cache):
   #                                                                            #
   # HINT: Look up the function np.add.at                                       #
   ##############################################################################
-  pass
+  x, W = cache
+  dW = np.zeros_like(W)
+  np.add.at(dW, x, dout) # for each word v, accumulate v's D vector gradients
   ##############################################################################
   #                               END OF YOUR CODE                             #
   ##############################################################################
@@ -380,6 +416,9 @@ def temporal_softmax_loss(x, y, mask, verbose=False):
   ground-truth element at each timestep. We use a cross-entropy loss at each
   timestep, summing the loss over all timesteps and averaging across the
   minibatch.
+  
+  My notes: for each data point, try to match T words to T ground-truth words, 
+  and calculate (sum) the cross-entropy loss for these T predictions.
 
   As an additional complication, we may want to ignore the model output at some
   timesteps, since sequences of different length may have been combined into a
