@@ -1,6 +1,9 @@
 # Stanford CS231N CNN for Visual Recognition
 Solution to 2016 & 2017 Course Assignments
 
+This course is a deep learning treasure. It guides you to implement everything (machine learning models, CNN layers, backpropagation, optimizers, etc.) by hand with only lib of numpy. 
+Though the process of implementing vectorized batch normalization backprop or convolutional filters are painful, it lays a solid fundation on one's understanding in deep learning. 
+The visulizations (saliency map, class image generation) and applications (style transfer) help gain insight.
 
 ## Assignment 1 - Put Together Image Classification
 
@@ -38,8 +41,10 @@ Solution to 2016 & 2017 Course Assignments
     - implement recurrent layers and backpropagaation 
 - [Image Captioning with LSTMs](assignment3/LSTM_Captioning.ipynb)
     - implement LSTM cell and backpropagation, cool results are collected:
-    <p align="left"> <img src="assignment3/lstm_sample0.png"> </p>
-    <p align="rightt"> <img src="assignment3/lstm_sample1.png"> </p>
+    <p align="left"> 
+    <img src="assignment3/lstm_sample0.png" width=400 height=400> 
+    <img src="assignment3/lstm_sample1.png" width=400 height=400> 
+    </p>
 - [Image Gradients: Saliency maps and Fooling Images](assignment3/ImageGradients.ipynb)
     - use pretrained model to compute gradients with respect to the image, and use them to produce saliency maps and fooling images
     - saliency map shows particular areas that excites classification:
@@ -51,13 +56,16 @@ Solution to 2016 & 2017 Course Assignments
     <p align="left"> <img src="assignment3/king_penguin.png"> </p>
     - feature inversion reconstructs image from features in a CNN layer
     - DeepDream repeatedly constructs (dreams) a image that amplify activations of a CNN layer:
-    <p align="left"> <img src="assignment3/deep_dream_dog.png"> </p>
+    <p align="left"> <img src="assignment3/deep_dream_dog.png" width=400 height=400 > </p>
 - [Style Transfer](assignment3_2017/StyleTransfer-TensorFlow.ipynb)
     - paint images with content of one image but the *style* of another:
-    <p align="left"> <img src="assignment3/style_tf_sample0.png"> </p>
-    <p align="rightt"> <img src="assignment3/style_tf_sample1.png"> </p>
+    <p align="left"> 
+    <img src="assignment3_2017/style_tf_sample0.png" width=400 height=400>
+    <img src="assignment3_2017/style_tf_sample1.png" width=400 height=400> 
+    </p>
 - [Generative Adversarial Networks](assignment3_2017/GANs-TensorFlow.ipynb)
     - train and implement a GAN to produce images that look like a dataset:
     <p align="left"> <img src="assignment3_2017/gan_outputs_tf.png"> </p>
 
-### Many thanks to CS231n instructors and TAs for creating such a meaty course 
+
+*Many thanks to CS231n instructors and TAs for creating such a meaty course.*
