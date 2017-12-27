@@ -3,7 +3,8 @@ Solution to 2016 & 2017 Course Assignments
 
 This course is a deep learning treasure. It guides you to implement everything (machine learning models, CNN layers, backpropagation, optimizers, etc.) by hand with only lib of numpy. 
 Though the process of implementing vectorized batch normalization backprop or convolutional filters are painful, it lays a solid fundation on one's understanding in deep learning. 
-The visulizations (saliency map, class image generation) and applications (style transfer) help gain insight.
+The visulizations (saliency map, class image generation) and applications (style transfer) help gain insight. 
+Implementing more powerful models in Tensorflow/PyTorch is a good entry point to start building something fun.
 
 ## Assignment 1 - Put Together Image Classification
 
