@@ -1,4 +1,4 @@
-# Stanford CS231N CNN for Visual Recognition
+# Stanford CS231n CNN for Visual Recognition
 Solution to 2016 & 2017 Course Assignments
 
 This course is a deep learning treasure. It guides you to implement everything (machine learning models, CNN layers, backpropagation, optimizers, etc.) by hand with only lib of numpy. 
